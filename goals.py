@@ -1,7 +1,22 @@
+#!/usr/bin/env python3
+"""
+    Usage:
+
+        # Print out current goals:
+            $ goals
+
+        # Add new goals:
+            $ goals add
+        
+        # Mark goal progress
+            $ goals edit <GOAL>
+"""
+
 import json
 import pandas as pd
 from datetime import datetime
 import sys
+import pprint
 
 # _______________________________________________________________________
 # Constants and Globals
@@ -64,9 +79,6 @@ def set_goals():
     goal_details["units"] = units
 
     goal_dict = {goal:goal_details}
-    # def rec_dd():
-    #     import collections
-    #     return collections.defaultdict(rec_dd)
 
     # this is super ugly, but works.
     try:
@@ -93,8 +105,9 @@ def list_goals(all = False, week=None):
     full_dict = get_goals()
 
     try:
-        goals = full_dict[year][week_num].keys()
-        print(goals)
+        goals = list(full_dict[year][week_num].keys())
+        for i, goal in enumerate(goals):
+            print(i+1, ": ", goal)
         return goals
 
     except KeyError:
@@ -115,15 +128,17 @@ def edit_goals(goal=None):
         goal = str(sys.argv[2])
     except IndexError:
         print("Need to provide a goal to edit. Try `list_goals` to see goals to choose from.")
+    
     full_dict = get_goals()
-    # print(full_dict)
     year, week_num = get_today()
+
     try:
         this_week = full_dict.get(year).get(week_num)
     except:
         print("You have no goals for this week to edit.")
+
     quantity = input("What is quantity completed? ")
-    print(this_week)
+
     print("You have completed {} out of {} {} for the week.".format(quantity, this_week[goal]['quantity'], this_week[goal]['units']))
     return
     
@@ -131,6 +146,8 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 1:
         list_goals()
+    elif sys.argv[1] == 'help':
+        print(__doc__) 
     elif sys.argv[1] == 'edit':
         edit_goals()
     elif sys.argv[1] == 'add':
