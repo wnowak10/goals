@@ -68,7 +68,7 @@ def set_goals():
 
     year, week_num = get_today()
 
-    goal     = input("What is your weekly goal? ")
+    goal     = input("What is your weekly goal? ").strip()
     quantity = input("What is quantity? ")
     units    = input("What units? ")
 
@@ -76,6 +76,7 @@ def set_goals():
     goal_details = {}
     goal_details["quantity"] = quantity
     goal_details["units"] = units
+    goal_details["completed"] = 0
 
     goal_dict = {goal:goal_details}
 
@@ -110,14 +111,20 @@ def list_goals(all = False, week=None):
         return goals
 
     except KeyError:
-        print("no goals for week of {}th week of {}.".format(week_num, year))
+        print("As of yet, no goals for week of {}th week of {}. Use `$ goals add` to add some!".format(week_num, year))
 
 def list_details(goal=None, week_num=None, year=None):
     full_dict = get_goals()
+    # dbg_print(full_dict['2020']['13']['ride'])
     if week_num is None and year is None:
         year, week_num = get_today()
-    if len(sys.argv) > 2:
-        goal = full_dict.get(year).get(week_num).get(str(sys.argv[2]))
+
+    if len(sys.argv) >= 2:
+        dbg_print('Getting goal from command line.')
+        try:
+            goal = full_dict.get(year).get(week_num).get(str(sys.argv[2]))
+        except AttributeError:
+            print("No goals for this time period.")
     else: 
         goal = full_dict.get(year).get(week_num).get(goal)
     print(goal)
@@ -126,26 +133,32 @@ def edit_goals(goal=None):
     try:
         goal = str(sys.argv[2])
     except IndexError:
-        print("Need to provide a goal to edit. Try `list_goals` to see goals to choose from.")
-    
+        print("Need to provide a goal to edit. Try `$goals` to see goals to choose from.")
+        return 
     full_dict = get_goals()
     year, week_num = get_today()
 
+    print(full_dict[year][week_num][goal]['completed'])
+    
     try:
         this_week = full_dict.get(year).get(week_num)
+        quantity = input("What is quantity completed? ")
+
+        full_dict[year][week_num][goal]['completed'] = quantity
+        write_goal_file(full_dict)
+
+        print("You have completed {} out of {} {} for the week.".format(quantity, this_week[goal]['quantity'], this_week[goal]['units']))
     except:
         print("You have no goals for this week to edit.")
 
-    quantity = input("What is quantity completed? ")
-
-    print("You have completed {} out of {} {} for the week.".format(quantity, this_week[goal]['quantity'], this_week[goal]['units']))
+    
     return
     
 if __name__ == '__main__':
 
     if len(sys.argv) == 1:
         list_goals()
-    elif sys.argv[1] == 'help':
+    elif sys.argv[1] in ['help','-h','--help']:
         print(__doc__) 
     elif sys.argv[1] == 'edit':
         edit_goals()
