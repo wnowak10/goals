@@ -6,95 +6,119 @@ from datetime import datetime
 # _______________________________________________________________________
 # Constants and Globals
 
+DEBUG_MODE = True
+
 _goals = None
 
 FILENAME = 'goals.json'
 
+# _______________________________________________________________________
+# Functions
 
+
+def dbg_print(*args):
+    if DEBUG_MODE:
+        print(*args)
 
 def get_goals():
 
-	global _goals
+    global _goals
 
-	if _goals is not None:
-		return _goals
+    if _goals is not None:
+        dbg_print("Goals is not None, they are", _goals)
+        return _goals
 
-	with open(FILENAME, 'r') as f:
-		_goals = json.load(f)
+    with open(FILENAME, 'r') as f:
+        _goals = json.load(f)
 
-	return _goals
+    return _goals
 
 def write_goal_file(dic, filename=None):
 
-	with open(FILENAME, 'w') as outfile:
-	    json.dump(dic, outfile)
+    with open(FILENAME, 'w') as outfile:
+        json.dump(dic, outfile)
 
 
 # Run on Sunday
 def set_goals():
-	
-	full_dict = get_goals()
 
-	year, week_num, _ = datetime.now().isocalendar()
-	week_year_tuple = str((year, week_num))
-	print(week_year_tuple)
+    global _goals
 
-	goal = input("What is your weekly goal? ")
-	quantity = input("What is quantity? ")
-	units = input("What units? ")
+    dbg_print("Setting goals:")
 
-	# For each goal set, a sub dictionary with details about it. 
-	goal_details = {}
-	goal_details["quantity"] = quantity
-	goal_details["units"] = units
+    full_dict = get_goals()
 
-	goal_dict = {goal:goal_details}
+    year, week_num, _ = datetime.now().isocalendar()
+    year = str(year)
+    week_num = str(week_num)
+    # week_num = '1'
 
-	try:
-		full_dict[week_year_tuple].update(goal_dict)
-	except KeyError:
-		full_dict[week_year_tuple] = {}
-		full_dict[week_year_tuple].update(goal_dict)
+    goal     = input("What is your weekly goal? ")
+    quantity = input("What is quantity? ")
+    units    = input("What units? ")
 
-	write_goal_file(full_dict)
+    # For each goal set, a sub dictionary with details about it. 
+    goal_details = {}
+    goal_details["quantity"] = quantity
+    goal_details["units"] = units
 
-	# with open('goals.json', 'w') as outfile:
-	#     json.dump(full_dict, outfile)
+    goal_dict = {goal:goal_details}
+    def rec_dd():
+        import collections
+        return collections.defaultdict(rec_dd)
 
-	return full_dict
+    try:
+        full_dict[year]
+    except:
+        full_dict[year] = {}
+    try:
+        full_dict[year][week_num]
+        full_dict[year][week_num].update(goal_dict)
+    except:
+        full_dict[year][week_num] = goal_dict
 
-def list_goals(week=None):
-	if week is None:
-		print("NO WEEK")
-		my_date = datetime.now()
-		year, week_num, _ = my_date.isocalendar()
-		week = str((year, week_num))
+    _goals = full_dict
 
-	full_dict = get_goals()
+    write_goal_file(full_dict)
 
-	print("week of :", week, '\n')
-	try:
-		goals = full_dict[week].keys()
-	except KeyError:
-		print("no goals for week of {}".format(week))
-	return
+    return full_dict
+
+def list_goals(all = False, week=None):
+    if week is None:
+        year, week_num, _ = datetime.now().isocalendar()
+        year = str(year)
+        week_num = str(week_num)
+        # year, week_num, _ = my_date.isocalendar()
+        # week = str((year, week_num))
+
+    full_dict = get_goals()
+
+    print("week of :", week_num, '\n')
+    goals = full_dict[year][week_num].keys()
+    print(goals)
+    # try:
+    #     goals = full_dict[year][week].keys()
+    # except KeyError:
+    #     print("no goals for week of {}th week of {}.".format(week_num, year))
+    # return
 
 set_goals()
+list_goals()
 
-	# print(full_dict[week].keys())
+    # print(full_dict[week].keys())
 
 # def edit_goals(goal):
-# 	my_date = datetime.now()
-# 	year, week_num, _ = my_date.isocalendar()
-# 	week_year_tuple = str((year, week_num))
+#   my_date = datetime.now()
+#   year, week_num, _ = my_date.isocalendar()
+#   week_year_tuple = str((year, week_num))
 
-# 	with open('goals.json', 'r') as f:
-# 	    full_dict = json.load(f)
+#   with open('goals.json', 'r') as f:
+#       full_dict = json.load(f)
 
-# 	this_week = full_dict[week_year_tuple]
-# 	# returns {"goals": [{"units": "miles", "goal": "ride", "quantity": "100"}]
-# 	this_week['goals']
-# 	{"week":{"goal":{goal_details}}}
+#   this_week = full_dict[week_year_tuple]
+#   # returns {"goals": [{"units": "miles", "goal": "ride", "quantity": "100"}]
+#   this_week['goals']
+#   {"week":{"goal":{goal_details}}}
 
 
 # list_goals(week = (2020, 12))
