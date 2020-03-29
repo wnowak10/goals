@@ -51,7 +51,7 @@ def get_goals():
         with open(PATH, 'r') as f:
             _goals = json.load(f)
     else:
-        print("You need a `goals.json` file in your home dir.")
+        print("You need a `goals.json` file in your home dir. Something like `$ cd ~ ; echo '{}' >> goalsss.json` should do the trick.")
         exit()
 
     return _goals
