@@ -82,8 +82,8 @@ def set_goals():
     year, week_num = get_today()
 
     goal     = input("What is your weekly goal? ").strip()
-    quantity = input("What is quantity? ")
-    units    = input("What units? ")
+    quantity = input("What is quantity? ").strip()
+    units    = input("What units? ").strip()
 
     # For each goal set, a sub dictionary with details about it. 
     goal_details = {}
@@ -128,7 +128,7 @@ def list_goals(all = False, week=None):
 
 def list_details(goal=None, week_num=None, year=None):
     full_dict = get_goals()
-    # dbg_print(full_dict['2020']['13']['ride'])
+
     if week_num is None and year is None:
         year, week_num = get_today()
 
