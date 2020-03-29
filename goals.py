@@ -47,15 +47,23 @@ def get_goals():
         dbg_print("Goals is not None, they are", _goals)
         return _goals
 
-    with open(PATH, 'r') as f:
-        _goals = json.load(f)
+    if os.path.isfile(PATH):
+        with open(PATH, 'r') as f:
+            _goals = json.load(f)
+    else:
+        print("You need a `goals.json` file in your home dir.")
+        exit()
 
     return _goals
 
 def write_goal_file(dic, filename=None):
 
-    with open(PATH, 'w') as outfile:
-        json.dump(dic, outfile)
+    if os.path.isfile(PATH):
+        with open(PATH, 'w') as outfile:
+            json.dump(dic, outfile)
+    else:
+        print("You need a `goals.json` file in your home dir.")
+        exit()
 
 def get_today():
     year, week_num, _ = datetime.now().isocalendar()
