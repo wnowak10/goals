@@ -10,12 +10,16 @@
         
         # Mark goal progress
             $ goals edit <GOAL>
+        
+        # Learn more about a specific goal
+            $ goals details <GOAL>
 """
 
 import json
 import pandas as pd
 from datetime import datetime
 import sys
+import os
 
 # _______________________________________________________________________
 # Constants and Globals
@@ -24,7 +28,8 @@ DEBUG_MODE = True
 
 _goals = None
 
-FILENAME = 'goals.json'
+FILENAME = '~/goals.json'
+PATH = os.path.expanduser(FILENAME)
 
 # _______________________________________________________________________
 # Functions
@@ -42,20 +47,20 @@ def get_goals():
         dbg_print("Goals is not None, they are", _goals)
         return _goals
 
-    with open(FILENAME, 'r') as f:
+    with open(PATH, 'r') as f:
         _goals = json.load(f)
 
     return _goals
 
 def write_goal_file(dic, filename=None):
 
-    with open(FILENAME, 'w') as outfile:
+    with open(PATH, 'w') as outfile:
         json.dump(dic, outfile)
 
 def get_today():
     year, week_num, _ = datetime.now().isocalendar()
-    year, week_num = str(year), str(week_num)
-    return year, week_num
+    return str(year), str(week_num)
+    # return year, week_num
 
 # Run on Sunday
 def set_goals():
