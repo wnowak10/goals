@@ -16,15 +16,15 @@
 """
 
 import json
-import pandas as pd
-from datetime import datetime
 import sys
 import os
+
+from datetime import datetime
 
 # _______________________________________________________________________
 # Constants and Globals
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 _goals = None
 
@@ -68,17 +68,14 @@ def write_goal_file(dic, filename=None):
 def get_today():
     year, week_num, _ = datetime.now().isocalendar()
     return str(year), str(week_num)
-    # return year, week_num
 
-# Run on Sunday
 def set_goals():
 
     global _goals
 
     dbg_print("Setting goals:")
 
-    full_dict = get_goals()
-
+    full_dict      = get_goals()
     year, week_num = get_today()
 
     goal     = input("What is your weekly goal? ").strip()
@@ -86,14 +83,14 @@ def set_goals():
     units    = input("What units? ").strip()
 
     # For each goal set, a sub dictionary with details about it. 
-    goal_details = {}
-    goal_details["quantity"] = quantity
-    goal_details["units"] = units
+    goal_details              = {}
+    goal_details["quantity"]  = quantity
+    goal_details["units"]     = units
     goal_details["completed"] = 0
 
-    goal_dict = {goal:goal_details}
+    goal_dict = {goal : goal_details}
 
-    # this is super ugly, but works.
+    # This is super ugly, but works.
     try:
         full_dict[year]
     except:
@@ -111,7 +108,7 @@ def set_goals():
     return full_dict
 
 def list_goals(all = False, week=None):
-    print("Listing week's goals: ")
+    dbg_print("Listing week's goals: ")
     if week is None:
         year, week_num = get_today()
 
@@ -120,10 +117,15 @@ def list_goals(all = False, week=None):
     try:
         goals = list(full_dict[year][week_num].keys())
         for i, goal in enumerate(goals):
-            print(i+1, ":", goal, ':', 
-            	full_dict[year][week_num][goal]['completed'], '/',
-            	full_dict[year][week_num][goal]['quantity'],
-            	full_dict[year][week_num][goal]['units'])
+            print(str(i+1)+
+                ". "+
+                goal+ 
+                ': '+ 
+            	full_dict[year][week_num][goal]['completed']+
+                '/'+
+            	full_dict[year][week_num][goal]['quantity']+
+            	' '+
+                full_dict[year][week_num][goal]['units'])
         return goals
 
     except KeyError:
@@ -136,14 +138,13 @@ def list_details(goal=None, week_num=None, year=None):
         year, week_num = get_today()
 
     if len(sys.argv) >= 2:
-        dbg_print('Getting goal from command line.')
         try:
             goal = full_dict.get(year).get(week_num).get(str(sys.argv[2]))
         except AttributeError:
             print("No goals for this time period.")
     else: 
         goal = full_dict.get(year).get(week_num).get(goal)
-    print(goal)
+    print('Completed {} out of {} {}.'.format(goal['completed'], goal['quantity'], goal['units']))
 
 def edit_goals(todo, goal=None):
     try:
@@ -151,15 +152,15 @@ def edit_goals(todo, goal=None):
     except IndexError:
         print("Need to provide a goal to edit. Try `$goals` to see goals to choose from.")
         return 
+
     full_dict = get_goals()
     year, week_num = get_today()
 
-    print(full_dict[year][week_num][goal]['completed'])
+    this_week = full_dict.get(year).get(week_num)
     
     if todo=='edit':
         try:
-            this_week = full_dict.get(year).get(week_num)
-            quantity = input("What is quantity completed? ")
+            quantity = input("What is quantity completed?")
 
             full_dict[year][week_num][goal]['completed'] = quantity
             write_goal_file(full_dict)
@@ -168,19 +169,14 @@ def edit_goals(todo, goal=None):
         except:
             print("You have no goals for this week to edit.")
     elif todo=='notes':
+        notes = input("Add notes:")
+
         try:
-            this_week = full_dict.get(year).get(week_num)
-            notes = input("Add notes:")
-
-            try:
-                full_dict[year][week_num][goal]['notes'].append(notes)
-            except:
-                full_dict[year][week_num][goal]['notes'] = [notes]
-            write_goal_file(full_dict)
-
-            print("You have completed {} out of {} {} for the week.".format(quantity, this_week[goal]['quantity'], this_week[goal]['units']))
+            full_dict[year][week_num][goal]['notes'].append(notes)
         except:
-            print("You have no goals for this week to edit.")
+            full_dict[year][week_num][goal]['notes'] = [notes]
+        
+        write_goal_file(full_dict)
 
     
     return
