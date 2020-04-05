@@ -113,6 +113,13 @@ def list_goals(all = False, week=None):
         year, week_num = get_today()
 
     full_dict = get_goals()
+    from collections import Counter
+    all_goals = []
+    for year in full_dict.keys():
+        for week in full_dict[year].keys():
+            for goal in full_dict[year][week].keys():
+                all_goals.append(goal)
+    most_common_goals = [i[0] for i in Counter(all_goals).most_common(5)]
 
     try:
         goals = list(full_dict[year][week_num].keys())
@@ -129,7 +136,9 @@ def list_goals(all = False, week=None):
         return goals
 
     except KeyError:
-        print("As of yet, no goals for week of {}th week of {}. Use `$ goals add` to add some!".format(week_num, year))
+        print("""As of yet, no goals for week of {}th week of {}.
+                Use `$ goals add` to add some!
+                Popular goals include {}.""".format(week_num, year, most_common_goals))
 
 def list_details(goal=None, week_num=None, year=None):
     full_dict = get_goals()
