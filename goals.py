@@ -121,10 +121,10 @@ def list_goals(all = False, week=None):
                 ". "+
                 goal+ 
                 ': '+ 
-            	full_dict[year][week_num][goal]['completed']+
+                full_dict[year][week_num][goal]['completed']+
                 '/'+
-            	full_dict[year][week_num][goal]['quantity']+
-            	' '+
+                full_dict[year][week_num][goal]['quantity']+
+                ' '+
                 full_dict[year][week_num][goal]['units'])
         return goals
 
@@ -156,8 +156,9 @@ def edit_goals(todo, goal=None):
     full_dict = get_goals()
     year, week_num = get_today()
 
-    this_week = full_dict.get(year).get(week_num)
-    
+    this_week = full_dict.get(year).get(week_num).get(goal)
+    print('So far, completed: ' + this_week['completed'])
+
     if todo=='edit':
         try:
             quantity = input("What is quantity completed?")
