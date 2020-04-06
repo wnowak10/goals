@@ -128,11 +128,11 @@ def list_goals(all = False, week=None):
                 ". "+
                 goal+ 
                 ': '+ 
-                full_dict[year][week_num][goal]['completed']+
+                str(full_dict[year][week_num][goal]['completed'])+
                 '/'+
-                full_dict[year][week_num][goal]['quantity']+
+                str(full_dict[year][week_num][goal]['quantity'])+
                 ' '+
-                full_dict[year][week_num][goal]['units'])
+                str(full_dict[year][week_num][goal]['units']))
         return goals
 
     except KeyError:
