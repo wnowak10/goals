@@ -10,9 +10,6 @@
         
         # Mark goal progress
             $ goals edit <GOAL>
-        
-        # Learn more about a specific goal
-            $ goals details <GOAL>
 """
 
 import json
@@ -107,12 +104,7 @@ def set_goals():
 
     return full_dict
 
-def list_goals(all = False, week=None):
-    dbg_print("Listing week's goals: ")
-    if week is None:
-        year, week_num = get_today()
-
-    full_dict = get_goals()
+def most_popular(full_dict):
     from collections import Counter
     all_goals = []
     for year in full_dict.keys():
@@ -120,7 +112,17 @@ def list_goals(all = False, week=None):
             for goal in full_dict[year][week].keys():
                 all_goals.append(goal)
     most_common_goals = [i[0] for i in Counter(all_goals).most_common(5)]
+    return most_common_goals
 
+
+def list_goals(all = False, week=None):
+    if week is None:
+        year, week_num = get_today()
+    else:
+        year, week_num = week[0], str(week[1])
+
+    full_dict = get_goals()
+    
     try:
         goals = list(full_dict[year][week_num].keys())
         for i, goal in enumerate(goals):
@@ -136,6 +138,7 @@ def list_goals(all = False, week=None):
         return goals
 
     except KeyError:
+        most_common_goals = most_popular(full_dict)
         print("""As of yet, no goals for week of {}th week of {}.
                 Use `$ goals add` to add some!
                 Popular goals include {}.""".format(week_num, year, most_common_goals))
@@ -166,7 +169,7 @@ def edit_goals(todo, goal=None):
     year, week_num = get_today()
 
     this_week = full_dict.get(year).get(week_num).get(goal)
-    print('So far, completed: ' + this_week['completed'])
+    print('So far, completed: ' + str(this_week['completed']))
 
     if todo=='edit':
         try:
@@ -187,9 +190,6 @@ def edit_goals(todo, goal=None):
             full_dict[year][week_num][goal]['notes'] = [notes]
         
         write_goal_file(full_dict)
-
-    
-    return
     
 if __name__ == '__main__':
 
@@ -203,6 +203,11 @@ if __name__ == '__main__':
         edit_goals('notes')
     elif sys.argv[1] == 'add':
         set_goals()
-    elif sys.argv[1] == 'details':
-        list_details()
+    # elif sys.argv[1] == 'details': DEPRECATE?
+        # list_details()
+    elif sys.argv[1] == 'last_week':
+        print("Last week!")
+        year, week_num = get_today()
+        last_week = (year, str(int(week_num)-1))
+        list_goals(week = last_week)
 
