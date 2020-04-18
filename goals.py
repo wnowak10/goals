@@ -28,6 +28,9 @@ _goals = None
 FILENAME = '~/goals.json'
 PATH = os.path.expanduser(FILENAME)
 
+WIDSOM = '~/wisdom.txt'
+PATH_OF_WISDOM = os.path.expanduser(WIDSOM)
+
 # _______________________________________________________________________
 # Functions
 
@@ -114,8 +117,16 @@ def most_popular(full_dict):
     most_common_goals = [i[0] for i in Counter(all_goals).most_common(5)]
     return most_common_goals
 
+def print_wisdom():
+    import random
+    with open(PATH_OF_WISDOM, 'r') as f:
+        wisdom_list = f.readlines()
+    print('\n****', random.sample(wisdom_list, 1)[0][:-1], '****\n')
 
 def list_goals(all = False, week=None):
+    
+    print_wisdom()
+
     if week is None:
         year, week_num = get_today()
     else:
@@ -143,21 +154,6 @@ def list_goals(all = False, week=None):
                 Use `$ goals add` to add some!
                 Popular goals include {}.""".format(week_num, year, most_common_goals))
 
-def list_details(goal=None, week_num=None, year=None):
-    full_dict = get_goals()
-
-    if week_num is None and year is None:
-        year, week_num = get_today()
-
-    if len(sys.argv) >= 2:
-        try:
-            goal = full_dict.get(year).get(week_num).get(str(sys.argv[2]))
-        except AttributeError:
-            print("No goals for this time period.")
-    else: 
-        goal = full_dict.get(year).get(week_num).get(goal)
-    print('Completed {} out of {} {}.'.format(goal['completed'], goal['quantity'], goal['units']))
-
 def edit_goals(todo, goal=None):
     try:
         goal = str(sys.argv[2])
@@ -173,7 +169,7 @@ def edit_goals(todo, goal=None):
 
     if todo=='edit':
         try:
-            quantity = input("What is quantity completed?")
+            quantity = input("What is quantity completed? ")
 
             full_dict[year][week_num][goal]['completed'] = quantity
             write_goal_file(full_dict)
@@ -203,8 +199,6 @@ if __name__ == '__main__':
         edit_goals('notes')
     elif sys.argv[1] == 'add':
         set_goals()
-    # elif sys.argv[1] == 'details': DEPRECATE?
-        # list_details()
     elif sys.argv[1] == 'last_week':
         print("Last week!")
         year, week_num = get_today()
