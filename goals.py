@@ -81,6 +81,8 @@ def set_goals():
     goal     = input("What is your weekly goal? ").strip()
     quantity = input("What is quantity? ").strip()
     units    = input("What units? ").strip()
+    if units == '':
+    	units = 'sessions'
 
     # For each goal set, a sub dictionary with details about it. 
     goal_details              = {}
@@ -165,19 +167,22 @@ def edit_goals(todo, goal=None):
     year, week_num = get_today()
 
     this_week = full_dict.get(year).get(week_num).get(goal)
-    print('So far, completed: ' + str(this_week['completed']))
+    try:
+        print('So far, completed: ' + str(this_week['completed']))
+    except:
+        print('So far, completed: 0')
 
-    if todo=='edit':
-        try:
-            quantity = input("What is quantity completed? ")
+    if todo == 'edit':
+        # try:
+        quantity = input("What is quantity completed? ")
 
-            full_dict[year][week_num][goal]['completed'] = quantity
-            write_goal_file(full_dict)
+        full_dict[year][week_num][goal]['completed'] = quantity
+        write_goal_file(full_dict)
 
-            print("You have completed {} out of {} {} for the week.".format(quantity, this_week[goal]['quantity'], this_week[goal]['units']))
-        except:
-            print("You have no goals for this week to edit.")
-    elif todo=='notes':
+        print("You have completed {} out of {} {} for the week.".format(quantity, full_dict[year][week_num][goal]['quantity'], full_dict[year][week_num][goal]['units']))
+        # except:
+            # print("You have no goals for this week to edit.")
+    elif todo == 'notes':
         notes = input("Add notes:")
 
         try:
