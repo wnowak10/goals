@@ -15,6 +15,7 @@
 import json
 import sys
 import os
+import random
 
 from datetime import datetime
 
@@ -78,7 +79,7 @@ def set_goals():
     full_dict      = get_goals()
     year, week_num = get_today()
 
-    goal     = input("What is your weekly goal? ").strip()
+    goal     = sys.argv[2]
     quantity = input("What is quantity? ").strip()
     units    = input("What units? ").strip()
     if units == '':
@@ -117,10 +118,10 @@ def most_popular(full_dict):
             for goal in full_dict[year][week].keys():
                 all_goals.append(goal)
     most_common_goals = [i[0] for i in Counter(all_goals).most_common(5)]
+
     return most_common_goals
 
 def print_wisdom():
-    import random
     with open(PATH_OF_WISDOM, 'r') as f:
         wisdom_list = f.readlines()
     print('\n****', random.sample(wisdom_list, 1)[0][:-1], '****\n')
@@ -173,15 +174,12 @@ def edit_goals(todo, goal=None):
         print('So far, completed: 0')
 
     if todo == 'edit':
-        # try:
         quantity = input("What is quantity completed? ")
 
         full_dict[year][week_num][goal]['completed'] = quantity
         write_goal_file(full_dict)
 
         print("You have completed {} out of {} {} for the week.".format(quantity, full_dict[year][week_num][goal]['quantity'], full_dict[year][week_num][goal]['units']))
-        # except:
-            # print("You have no goals for this week to edit.")
     elif todo == 'notes':
         notes = input("Add notes:")
 
