@@ -6,10 +6,13 @@
             $ goals
 
         # Add new goals:
-            $ goals add
+            $ goals add <GOAL>
         
         # Mark goal progress
             $ goals edit <GOAL>
+
+        # See notes on a goal
+            $ goals details <GOAL>
 """
 
 import json
@@ -41,6 +44,9 @@ def dbg_print(*args):
         print(*args)
 
 def get_goals():
+    """
+    Load goals from ~/goals.json.
+    """
 
     global _goals
 
@@ -83,7 +89,7 @@ def set_goals():
     quantity = input("What is quantity? ").strip()
     units    = input("What units? ").strip()
     if units == '':
-    	units = 'sessions'
+        units = 'sessions'
 
     # For each goal set, a sub dictionary with details about it. 
     goal_details              = {}
@@ -153,9 +159,9 @@ def list_goals(all = False, week=None):
 
     except KeyError:
         most_common_goals = most_popular(full_dict)
-        print("""As of yet, no goals for week of {}th week of {}.
-                Use `$ goals add` to add some!
-                Popular goals include {}.""".format(week_num, year, most_common_goals))
+        print("""   As of yet, no goals for week of {}th week of {}.
+    Use `$ goals add` to add some!
+    Popular goals include {}. \n""".format(week_num, year, most_common_goals))
 
 def edit_goals(todo, goal=None):
     try:
@@ -189,7 +195,52 @@ def edit_goals(todo, goal=None):
             full_dict[year][week_num][goal]['notes'] = [notes]
         
         write_goal_file(full_dict)
-    
+
+def set_day_goals():
+    import numpy as np
+
+    global day_goals
+
+    try:
+        with open("day.txt", "r") as file:
+            day_goals = eval(file.readline())
+            time_stamp = day_goals[-1]
+            if datetime.now().isocalendar() != time_stamp:
+                day_goals = []
+    except:
+        day_goals = []
+
+    try:
+        day_goals.pop()
+    except:
+        print("No list to pop.")
+
+    inputt = '.'
+    while inputt != '':
+        inputt = input("Day goal? ").strip()
+        day_goals.append(inputt)
+
+    import time
+    day_goals[-1] = datetime.now().isocalendar()
+
+    with open("day.txt", "w") as file:
+        file.write(str(day_goals))
+
+
+def get_day_goals():
+    with open("day.txt", "r") as file:
+        data2 = eval(file.readline())
+    print(data2[:-1])  # Leave off time stamp.
+
+def list_notes(goal):
+    print('hi', sys.argv[2])
+    full_dict = get_goals()
+    year, week_num = get_today()
+    try:
+        print(full_dict[year][week_num][goal]['notes'])
+    except:
+        print("No notes for this goal.")
+
 if __name__ == '__main__':
 
     if len(sys.argv) == 1:
@@ -198,8 +249,14 @@ if __name__ == '__main__':
         print(__doc__) 
     elif sys.argv[1] == 'edit':
         edit_goals('edit')
+    elif sys.argv[1] == 'day':
+        set_day_goals()
+    elif sys.argv[1] == 'list_day':
+        get_day_goals()
     elif sys.argv[1] == 'notes':
         edit_goals('notes')
+    elif sys.argv[1] == 'details':
+        list_notes(sys.argv[2])
     elif sys.argv[1] == 'add':
         set_goals()
     elif sys.argv[1] == 'last_week':
