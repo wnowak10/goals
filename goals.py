@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+
+# import readline
+
+# def completer(text, state):
+#     options = ['edit']
+#     return ['yo','bill']
+#     # if state < len(options):
+#     #     return options[state]
+#     # else:
+#     #     return None
+
+# readline.parse_and_bind("tab: complete")
+# readline.set_completer(completer)
+
+
 """
     Usage:
 
@@ -241,6 +256,38 @@ def list_notes(goal):
     except:
         print("No notes for this goal.")
 
+def start_timer():
+    '''
+    Copied from
+
+    https://stackoverflow.com/questions/15802554/how-to-make-a-timer-program-in-python
+    '''
+    import sys
+    import time
+    import os
+
+    counter=0
+    s = 0
+    m = 0
+    n = int(input("Set number of minutes: "))
+    print("")
+
+    while counter <= n*60:
+        sys.stdout.write("\x1b[1A\x1b[2k")
+        print('Focused for: ', m, 'minutes, ', s, 'seconds')
+        time.sleep(1)
+        s += 1
+        counter+=1
+        if s == 60:
+            m += 1
+            s = 0
+
+    print("\nTime Is Over Sir! Timer Complete!\n")
+    # Play sound.
+    from playsound import playsound
+    playsound('chime.mp3')
+
+
 if __name__ == '__main__':
 
     if len(sys.argv) == 1:
@@ -259,6 +306,8 @@ if __name__ == '__main__':
         list_notes(sys.argv[2])
     elif sys.argv[1] == 'add':
         set_goals()
+    elif sys.argv[1] == 'timer':
+        start_timer()
     elif sys.argv[1] == 'last_week':
         print("Last week!")
         year, week_num = get_today()
