@@ -269,12 +269,16 @@ def start_timer():
     counter=0
     s = 0
     m = 0
-    n = int(input("Set number of minutes: "))
+    n = input("Set number of minutes (25 is default): ")
+    if n=='':
+        n=25
+    else:
+        n=int(n)
     print("")
 
     while counter <= n*60:
         sys.stdout.write("\x1b[1A\x1b[2k")
-        print('Focused for: ', m, 'minutes, ', s, 'seconds')
+        print('Time remaining: ', n-m-1, 'minutes, ', 60-s, 'seconds')
         time.sleep(1)
         s += 1
         counter+=1
