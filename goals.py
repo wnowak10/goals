@@ -1,19 +1,4 @@
 #!/usr/bin/env python3
-
-# import readline
-
-# def completer(text, state):
-#     options = ['edit']
-#     return ['yo','bill']
-#     # if state < len(options):
-#     #     return options[state]
-#     # else:
-#     #     return None
-
-# readline.parse_and_bind("tab: complete")
-# readline.set_completer(completer)
-
-
 """
     Usage:
 
@@ -28,6 +13,9 @@
 
         # See notes on a goal
             $ goals details <GOAL>
+
+        # Set timer to focus on a goal
+            $ goals timer <TIME>
 """
 
 import json
@@ -49,6 +37,9 @@ PATH = os.path.expanduser(FILENAME)
 
 WIDSOM = '~/wisdom.txt'
 PATH_OF_WISDOM = os.path.expanduser(WIDSOM)
+
+CHIME = '~/chime.mp3'
+CHIMEPATH = os.path.expanduser(CHIME)
 
 # _______________________________________________________________________
 # Functions
@@ -91,6 +82,19 @@ def get_today():
     year, week_num, _ = datetime.now().isocalendar()
     return str(year), str(week_num)
 
+def assign_units(goal, units=None):
+    print("assigning units for", goal)
+    if units is None:
+        if goal=='ride':
+            units='miles'
+        elif goal=='pushups':
+            units=='pushups'
+        elif goal=='situps':
+            units==''
+        else:
+            units = 'sessions'
+    return units
+
 def set_goals():
 
     global _goals
@@ -103,8 +107,8 @@ def set_goals():
     goal     = sys.argv[2]
     quantity = input("What is quantity? ").strip()
     units    = input("What units? ").strip()
-    if units == '':
-        units = 'sessions'
+    units    = assign_units(goal)
+    
 
     # For each goal set, a sub dictionary with details about it. 
     goal_details              = {}
@@ -211,44 +215,43 @@ def edit_goals(todo, goal=None):
         
         write_goal_file(full_dict)
 
-def set_day_goals():
-    import numpy as np
+# def set_day_goals():
+#     import numpy as np
 
-    global day_goals
+#     global day_goals
 
-    try:
-        with open("day.txt", "r") as file:
-            day_goals = eval(file.readline())
-            time_stamp = day_goals[-1]
-            if datetime.now().isocalendar() != time_stamp:
-                day_goals = []
-    except:
-        day_goals = []
+#     try:
+#         with open("day.txt", "r") as file:
+#             day_goals = eval(file.readline())
+#             time_stamp = day_goals[-1]
+#             if datetime.now().isocalendar() != time_stamp:
+#                 day_goals = []
+#     except:
+#         day_goals = []
 
-    try:
-        day_goals.pop()
-    except:
-        print("No list to pop.")
+#     try:
+#         day_goals.pop()
+#     except:
+#         print("No list to pop.")
 
-    inputt = '.'
-    while inputt != '':
-        inputt = input("Day goal? ").strip()
-        day_goals.append(inputt)
+#     inputt = '.'
+#     while inputt != '':
+#         inputt = input("Day goal? ").strip()
+#         day_goals.append(inputt)
 
-    import time
-    day_goals[-1] = datetime.now().isocalendar()
+#     import time
+#     day_goals[-1] = datetime.now().isocalendar()
 
-    with open("day.txt", "w") as file:
-        file.write(str(day_goals))
+#     with open("day.txt", "w") as file:
+#         file.write(str(day_goals))
 
 
-def get_day_goals():
-    with open("day.txt", "r") as file:
-        data2 = eval(file.readline())
-    print(data2[:-1])  # Leave off time stamp.
+# def get_day_goals():
+#     with open("day.txt", "r") as file:
+#         data2 = eval(file.readline())
+#     print(data2[:-1])  # Leave off time stamp.
 
 def list_notes(goal):
-    print('hi', sys.argv[2])
     full_dict = get_goals()
     year, week_num = get_today()
     try:
@@ -256,7 +259,7 @@ def list_notes(goal):
     except:
         print("No notes for this goal.")
 
-def start_timer():
+def start_timer(n=None, s=None):
     '''
     Copied from
 
@@ -269,27 +272,31 @@ def start_timer():
     counter=0
     s = 0
     m = 0
-    n = input("Set number of minutes (25 is default): ")
-    if n=='':
+    if not n:
+        n = input("Set number of minutes (25 is default): ")
+    if n=='':  # Set default.
         n=25
     else:
         n=int(n)
     print("")
 
-    while counter <= n*60:
+    while counter < n*60:
         sys.stdout.write("\x1b[1A\x1b[2k")
-        print('Time remaining: ', n-m-1, 'minutes, ', 60-s, 'seconds')
+        print('Time remaining: ' + str(n-m-1) + ' minutes, ' + str(60-s) + ' seconds')
         time.sleep(1)
         s += 1
         counter+=1
         if s == 60:
-            m += 1
+            if m<n+1:
+                m += 1
+            else:
+                m=n
             s = 0
 
     print("\nTime Is Over Sir! Timer Complete!\n")
     # Play sound.
     from playsound import playsound
-    playsound('chime.mp3')
+    playsound(CHIMEPATH)
 
 
 if __name__ == '__main__':
@@ -300,10 +307,10 @@ if __name__ == '__main__':
         print(__doc__) 
     elif sys.argv[1] == 'edit':
         edit_goals('edit')
-    elif sys.argv[1] == 'day':
-        set_day_goals()
-    elif sys.argv[1] == 'list_day':
-        get_day_goals()
+    # elif sys.argv[1] == 'day':
+    #     set_day_goals()
+    # elif sys.argv[1] == 'list_day':
+    #     get_day_goals()
     elif sys.argv[1] == 'notes':
         edit_goals('notes')
     elif sys.argv[1] == 'details':
@@ -311,7 +318,11 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'add':
         set_goals()
     elif sys.argv[1] == 'timer':
-        start_timer()
+        try:
+            n = sys.argv[2]
+        except:
+            n = None
+        start_timer(n)
     elif sys.argv[1] == 'last_week':
         print("Last week!")
         year, week_num = get_today()
