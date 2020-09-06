@@ -272,6 +272,8 @@ def start_timer(n=None, s=None):
     counter=0
     s = 0
     m = 0
+    len_n = len(str(n))
+    initial_n = n
     if not n:
         n = input("Set number of minutes (25 is default): ")
     if n=='':  # Set default.
@@ -281,8 +283,9 @@ def start_timer(n=None, s=None):
     print("")
 
     while counter < n*60:
+        # Using this rjust hack. Otherwise I was getting lagging `s` when the string shortened in length.
+        print('Time remaining: ' + str(n-m-1).rjust(len_n) + ' minutes, ' + str(60-s).rjust(2) + ' seconds')
         sys.stdout.write("\x1b[1A\x1b[2k")
-        print('Time remaining: ' + str(n-m-1) + ' minutes, ' + str(60-s) + ' seconds')
         time.sleep(1)
         s += 1
         counter+=1
