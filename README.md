@@ -16,5 +16,10 @@ Then call AppleScript App from iCal [events.](https://softron.zendesk.com/hc/en-
 
 ## TO DO:
 
-- Run apple script on Sunday.
-- Run other apple scripts randomly throughout the week. 
+Additionally, to get tab autocomplete, add the following lines to ~/.zshrc.
+
+```
+autoload bashcompinit
+bashcompinit
+source ~/goals/goalcomplete.bash
+```

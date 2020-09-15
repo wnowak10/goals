@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+A "session", unless otherwise noted, represents a focused 25 minute block of time.
+
     Usage:
 
         # Print out current goals:
@@ -28,22 +31,23 @@ from datetime import datetime
 # _______________________________________________________________________
 # Constants and Globals
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 _goals = None
 
 FILENAME = '~/goals.json'
-PATH = os.path.expanduser(FILENAME)
-
 WIDSOM = '~/wisdom.txt'
-PATH_OF_WISDOM = os.path.expanduser(WIDSOM)
-
 CHIME = '~/chime.mp3'
+
+# Set to top level directory. For my local machine, these paths resolve to
+# /Users/willnowak
+
+PATH = os.path.expanduser(FILENAME)
+PATH_OF_WISDOM = os.path.expanduser(WIDSOM)
 CHIMEPATH = os.path.expanduser(CHIME)
 
 # _______________________________________________________________________
 # Functions
-
 
 def dbg_print(*args):
     if DEBUG_MODE:
@@ -83,14 +87,11 @@ def get_today():
     return str(year), str(week_num)
 
 def assign_units(goal, units=None):
-    print("assigning units for", goal)
     if units is None:
-        if goal=='ride':
-            units='miles'
-        elif goal=='pushups':
-            units=='pushups'
-        elif goal=='situps':
-            units==''
+        if goal[-1]=='s':  # E.g. goal is meetingS, then 5 meetings are units.
+            units = goal
+        elif goal == 'ride':
+            units = 'miles'
         else:
             units = 'sessions'
     return units
@@ -151,6 +152,23 @@ def print_wisdom():
         wisdom_list = f.readlines()
     print('\n****', random.sample(wisdom_list, 1)[0][:-1], '****\n')
 
+def return_goal_list(week=None):
+    """
+    Function to return goals as a string for autocomplete.
+
+    See README and `goalcomplete.bash` for details.
+    """
+
+    if week is None:
+        year, week_num = get_today()
+    else:
+        year, week_num = week[0], str(week[1])
+
+    full_dict = get_goals()
+    s = " ".join(list(full_dict[year][week_num].keys()))
+    print(s)
+
+
 def list_goals(all = False, week=None):
     
     print_wisdom()
@@ -186,7 +204,7 @@ def edit_goals(todo, goal=None):
     try:
         goal = str(sys.argv[2])
     except IndexError:
-        print("Need to provide a goal to edit. Try `$goals` to see goals to choose from.")
+        print("Need to provide a goal to edit. Try `$ goals` to see goals to choose from.")
         return 
 
     full_dict = get_goals()
@@ -283,18 +301,22 @@ def start_timer(n=None, s=None):
     print("")
 
     while counter < n*60:
-        # Using this rjust hack. Otherwise I was getting lagging `s` when the string shortened in length.
-        print('Time remaining: ' + str(n-m-1).rjust(len_n) + ' minutes, ' + str(60-s).rjust(2) + ' seconds')
-        sys.stdout.write("\x1b[1A\x1b[2k")
-        time.sleep(1)
-        s += 1
-        counter+=1
-        if s == 60:
-            if m<n+1:
-                m += 1
-            else:
-                m=n
-            s = 0
+            try:
+                # Using this rjust hack. Otherwise I was getting lagging `s` when the string shortened in length.
+                print('Time remaining: ' + str(n-m-1).rjust(len_n) + ' minutes, ' + str(60-s).rjust(2) + ' seconds')
+                sys.stdout.write("\x1b[1A\x1b[2k")
+                time.sleep(1)
+                s += 1
+                counter+=1
+                if s == 60:
+                    if m<n+1:
+                        m += 1
+                    else:
+                        m=n
+                    s = 0
+            except KeyboardInterrupt:
+                print("\n\nInterrupted with {} minutes remaining. Go be nice and take care of what needs tending to, and then come back and finish focus block!".format(n-m-1))
+                sys.exit(0)
 
     print("\nTime Is Over Sir! Timer Complete!\n")
     # Play sound.
@@ -308,7 +330,7 @@ if __name__ == '__main__':
         list_goals()
     elif sys.argv[1] in ['help','-h','--help']:
         print(__doc__) 
-    elif sys.argv[1] == 'edit':
+    elif sys.argv[1] in ['edit', 'e']:
         edit_goals('edit')
     # elif sys.argv[1] == 'day':
     #     set_day_goals()
@@ -326,6 +348,8 @@ if __name__ == '__main__':
         except:
             n = None
         start_timer(n)
+    elif sys.argv[1] == 'return_goal_list':
+        return_goal_list()
     elif sys.argv[1] == 'last_week':
         print("Last week!")
         year, week_num = get_today()
