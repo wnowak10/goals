@@ -4,7 +4,7 @@ _goals_completer() {
  	cur="${COMP_WORDS[COMP_CWORD]}"
  	prev="${COMP_WORDS[COMP_CWORD-1]}"
  	
- 	opts="add edit" 	
+ 	opts="add edit notes last_week copy_last_week" 	
  	opts2=$(python3 /Users/willnowak/goals/goals.py return_goal_list)
 
 	if [[ ${COMP_CWORD} -eq 1 ]] ; then
@@ -20,5 +20,15 @@ _goals_completer() {
 	fi
 
 	esac
+
+	case "${prev}" in
+		'notes')
+	if [[ ${COMP_CWORD} -eq 2 ]] ; then
+ 		COMPREPLY=( $(compgen -W "${opts2}" ${cur}) )
+ 		return 0
+	fi
+
+	esac
 }
 complete -F _goals_completer goals
+complete -F _goals_completer g

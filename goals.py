@@ -96,6 +96,13 @@ def assign_units(goal, units=None):
             units = 'sessions'
     return units
 
+def print_network():
+    import pandas as pd
+    df = pd.read_csv("/Users/willnowak/network.csv")
+    names = df['name']
+    import random
+    print("Time to network with:", random.sample(list(names),1)[0])
+
 def set_goals():
 
     global _goals
@@ -152,11 +159,36 @@ def print_wisdom():
         wisdom_list = f.readlines()
     print('\n****', random.sample(wisdom_list, 1)[0][:-1], '****\n')
 
+def copy_reset_lastweek():
+    """
+    Janky function to load last weeks data, copy it to full dictionary.
+
+    Then due to deepcopy issues, reload JSON, and reset values to 0.
+    """
+    year, week_num = get_today()
+
+    last_week = (year, str(int(week_num)-1))
+
+    full_dict = get_goals()
+    import copy
+    last_week_dict = copy.deepcopy(full_dict[last_week[0]][last_week[1]])
+
+    full_dict[year][week_num] = last_week_dict
+    write_goal_file(full_dict)
+    full_dict = get_goals()
+    for key in full_dict[year][week_num].keys():
+        full_dict[year][week_num][key]['completed'] = 0
+    write_goal_file(full_dict)
+    
+
 def return_goal_list(week=None):
     """
-    Function to return goals as a string for autocomplete.
+    Needed function to return goals as a string for autocomplete.
 
     See README and `goalcomplete.bash` for details.
+
+    If you don't want to use autocomplete in terminal, this fuction
+    serves no purpose. 
     """
 
     if week is None:
@@ -165,8 +197,11 @@ def return_goal_list(week=None):
         year, week_num = week[0], str(week[1])
 
     full_dict = get_goals()
-    s = " ".join(list(full_dict[year][week_num].keys()))
-    print(s)
+    try:
+        s = " ".join(list(full_dict[year][week_num].keys()))
+        print(s)
+    except:
+        print("No goals yet!")
 
 
 def list_goals(all = False, week=None):
@@ -177,6 +212,10 @@ def list_goals(all = False, week=None):
         year, week_num = get_today()
     else:
         year, week_num = week[0], str(week[1])
+
+    # Every 5 weeks, remind me to network with someone.
+    if ((int(week_num))%5)==0:
+        print_network()
 
     full_dict = get_goals()
     
@@ -350,6 +389,8 @@ if __name__ == '__main__':
         start_timer(n)
     elif sys.argv[1] == 'return_goal_list':
         return_goal_list()
+    elif sys.argv[1] == 'copy_last_week':
+        copy_reset_lastweek()
     elif sys.argv[1] == 'last_week':
         print("Last week!")
         year, week_num = get_today()
