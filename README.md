@@ -23,3 +23,9 @@ autoload bashcompinit
 bashcompinit
 source ~/goals/goalcomplete.bash
 ```
+
+To add aliases fir zsh users. 
+
+unalias g # Git alias
+alias ge="goals edit"
+alias gt="goals todos"

@@ -31,18 +31,21 @@ from datetime import datetime
 # _______________________________________________________________________
 # Constants and Globals
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 _goals = None
+_todos = None
 
 FILENAME = '~/goals.json'
 WIDSOM = '~/wisdom.txt'
 CHIME = '~/chime.mp3'
+LONGTERMTODOS = '~/todos.json'
 
 # Set to top level directory. For my local machine, these paths resolve to
 # /Users/willnowak
 
 PATH = os.path.expanduser(FILENAME)
+todoPATH = os.path.expanduser(LONGTERMTODOS)
 PATH_OF_WISDOM = os.path.expanduser(WIDSOM)
 CHIMEPATH = os.path.expanduser(CHIME)
 
@@ -73,6 +76,58 @@ def get_goals():
 
     return _goals
 
+def get_todos(pr = True):
+    """
+    Load goals from ~/goals.json.
+    """
+
+    global _todos
+
+    if _todos is not None:
+        dbg_print("_todos is not None, they are", _todos)
+        return _todos
+
+    if os.path.isfile(todoPATH):
+        with open(todoPATH, 'r') as f:
+            _todos = json.load(f)
+    else:
+        print("You need a `goals.json` file in your home dir. Something like `$ cd ~ ; echo '{}' >> goals.json` should do the trick.")
+        exit()
+    tododict = _todos
+    notdone = []
+    for key in tododict.keys():
+        if tododict[key] == 0 or tododict[key] == '0':
+            notdone.append(key)
+    # print(list(_todos.keys()))
+    if pr:
+        print('')
+        for g in notdone:
+            print('> ', g)
+        print('')
+    return _todos
+
+def add_todos(todo, pr = False):
+    """
+    Load goals from ~/goals.json.
+    """
+
+    tododict = get_todos(pr)
+    tododict.update({todo:0})
+    if os.path.isfile(todoPATH):
+        with open(todoPATH, 'w') as outfile:
+            json.dump(tododict, outfile)
+
+def completed(todo, pr = False):
+    """
+    Load goals from ~/goals.json.
+    """
+
+    tododict = get_todos(pr)
+    tododict[todo] = 1
+    if os.path.isfile(todoPATH):
+        with open(todoPATH, 'w') as outfile:
+            json.dump(tododict, outfile)
+
 def write_goal_file(dic, filename=None):
 
     if os.path.isfile(PATH):
@@ -87,21 +142,18 @@ def get_today():
     return str(year), str(week_num)
 
 def assign_units(goal, units=None):
-    if units is None:
+    if units is None or units == '':
         if goal[-1]=='s':  # E.g. goal is meetingS, then 5 meetings are units.
             units = goal
-        elif goal == 'ride':
-            units = 'miles'
+        # elif goal == 'ride':
+            # units = 'miles'
         else:
             units = 'sessions'
     return units
 
-def print_network():
-    import pandas as pd
-    df = pd.read_csv("/Users/willnowak/network.csv")
-    names = df['name']
-    import random
-    print("Time to network with:", random.sample(list(names),1)[0])
+# def print_network(): 
+#     import random
+#     print("Time to network with:", names[-1])
 
 def set_goals():
 
@@ -115,7 +167,7 @@ def set_goals():
     goal     = sys.argv[2]
     quantity = input("What is quantity? ").strip()
     units    = input("What units? ").strip()
-    units    = assign_units(goal)
+    units    = assign_units(goal, units)
     
 
     # For each goal set, a sub dictionary with details about it. 
@@ -203,6 +255,22 @@ def return_goal_list(week=None):
     except:
         print("No goals yet!")
 
+def return_todo_list(week=None):
+    """
+    Needed function to return goals as a string for autocomplete.
+
+    See README and `goalcomplete.bash` for details.
+
+    If you don't want to use autocomplete in terminal, this fuction
+    serves no purpose. 
+    """
+    tododict = get_todos(pr = False)
+    notdone = []
+    for key in tododict.keys():
+        if tododict[key] == 0 or tododict[key] == '0':
+            notdone.append(key)
+    print(" ".join(notdone))
+    return notdone
 
 def list_goals(all = False, week=None):
     
@@ -215,7 +283,9 @@ def list_goals(all = False, week=None):
 
     # Every 5 weeks, remind me to network with someone.
     if ((int(week_num))%5)==0:
-        print_network()
+        print("You got this!\n")
+        # print_network()
+
 
     full_dict = get_goals()
     
@@ -381,6 +451,12 @@ if __name__ == '__main__':
         list_notes(sys.argv[2])
     elif sys.argv[1] == 'add':
         set_goals()
+    elif sys.argv[1] == 'todos':
+        get_todos()
+    elif sys.argv[1] == 'add_todos':
+        add_todos(sys.argv[2])
+    elif sys.argv[1] == 'completed':
+        completed(sys.argv[2])
     elif sys.argv[1] == 'timer':
         try:
             n = sys.argv[2]
@@ -389,6 +465,8 @@ if __name__ == '__main__':
         start_timer(n)
     elif sys.argv[1] == 'return_goal_list':
         return_goal_list()
+    elif sys.argv[1] == 'return_todo_list':
+        return_todo_list()
     elif sys.argv[1] == 'copy_last_week':
         copy_reset_lastweek()
     elif sys.argv[1] == 'last_week':
