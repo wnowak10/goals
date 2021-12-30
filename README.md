@@ -18,19 +18,19 @@ A "session", unless otherwise noted, represents a focused 25 minute block of tim
     Usage:
 
         # Print out current goals:
-            `$ goals`
+            $ goals
 
         # Add new goals:
-            `$ goals add <GOAL>`
+            $ goals add <GOAL>
 
         # Mark goal progress
-            `$ goals edit <GOAL>`
+            $ goals edit <GOAL>
 
         # See notes on a goal
-            `$ goals details <GOAL>`
+            $ goals details <GOAL>
 
         # Set timer to focus on a goal
-            `$ goals timer <TIME>`
+            $ goals timer <TIME>
 
 ## Use AppleScript to run on a schedule. (Hacky)
 
@@ -47,6 +47,6 @@ source ~/goals/goalcomplete.bash
 
 ## To add aliases for zsh users:
 
-unalias g # Git alias
-alias ge="goals edit"
-alias gt="goals todos"
+	unalias g # Git alias
+	alias ge="goals edit"
+	alias gt="goals todos"
