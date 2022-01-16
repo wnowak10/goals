@@ -15,6 +15,8 @@ Use `goals help` for docstrings.
 
 A "session", unless otherwise noted, represents a focused 25 minute block of time.
 
+A "daily_touch" simply means that I engaged in the activity, even for 1 minute, in a day. The idea being that activities "touched" every day are ones where habits form, and compounding progress comes as a result of small practice over a long and period of time.
+
     Usage:
 
         # Print out current goals:

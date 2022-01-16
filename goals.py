@@ -222,8 +222,19 @@ def copy_reset_lastweek():
     last_week = (year, str(int(week_num)-1))
 
     full_dict = get_goals()
+
     import copy
-    last_week_dict = copy.deepcopy(full_dict[last_week[0]][last_week[1]])
+    # Handle the first week of the year
+    try:
+        last_week_dict = copy.deepcopy(full_dict[last_week[0]][last_week[1]])
+    except KeyError:  # Create new year.
+        print("Happy New Year!")
+        full_dict[year] = {}
+        last_year = str(int(year)-1)
+        last_week_of_year = '52'
+        last_week_dict = copy.deepcopy(full_dict[last_year][last_week_of_year])
+
+    
 
     full_dict[year][week_num] = last_week_dict
     write_goal_file(full_dict)
